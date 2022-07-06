@@ -16,15 +16,15 @@ namespace ListPoker.Model
                 List<int> results = new List<int>();
                 foreach (var item1 in item.Value)       // item1.Key - player
                 {
-                    bool success;
+                    bool isStandartChoice;
                     if ((item1.Value[0].Text != "" || item1.Value[1].Text != "") && item1.Value[2].Text != "")
                     {
                         int playerWish;
-                        success = int.TryParse(item1.Value[0].Text, out playerWish);
+                        isStandartChoice = int.TryParse(item1.Value[0].Text, out playerWish);
                         
-                        if (!success)
+                        if (!isStandartChoice)
                         {
-                            playerWish = int.Parse(item1.Value[1].Text) * 2;
+                            playerWish = int.Parse(item1.Value[1].Text);
                         }
 
                         int playerGets;
@@ -47,7 +47,7 @@ namespace ListPoker.Model
                             {
                                 results.Add(playerGets * 2);
                             }
-                            if (!success)
+                            if (!isStandartChoice)
                             {
                                 results[results.Count - 1] *= 2;
                             }

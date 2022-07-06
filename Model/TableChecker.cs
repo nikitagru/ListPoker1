@@ -65,5 +65,7 @@ namespace ListPoker.Model
             return (isCorrect, correctStep);
             
         }
+
+        public bool CheckNextRoundArea()
     }
 }

@@ -14,14 +14,16 @@ namespace ListPoker.View
     {
         List<Player> players = new List<Player>();      
         // key - current step, value - player and his choice
-        Dictionary<int, Dictionary<Player, TextBox[]>> allPlayersChoice = new Dictionary<int, Dictionary<Player, TextBox[]>>();
+        Dictionary<int, Dictionary<Player, List<ComboBox>>> allPlayersChoice = new Dictionary<int, Dictionary<Player, List<ComboBox>>>();
         // key - current step, value - player score
         Dictionary<int, List<Label>> playersResults = new Dictionary<int, List<Label>>();
-        
+        PlayTableController tableController = new PlayTableController();
+
         string[] playerInfo = new string[] { "заказ", "темная", "взятка", "итого" };
         Brush br;
         
-        int currentStep;
+        int currentStep = 1;
+        bool printNewStep = true;
 
         Form1 form1;
         public PlayTable(string playerNames, Form1 form)
@@ -38,8 +40,8 @@ namespace ListPoker.View
             DrawPlayerNames();
             DrawDistributor();
             DrawCardCount();
-            DrawPlayerInfo();
-            CreateRoundArea();
+            DrawPlayerRoundVariants();
+            
             CreateResultLabels();
             timer1.Interval = 500;
             timer1.Start();
@@ -60,7 +62,7 @@ namespace ListPoker.View
         private void Update(object sender, EventArgs e)
         {
             this.Invalidate();
-            PlayTableController tableController = new PlayTableController();
+            
             (bool, int) isCorrectUserInput = tableController.CheckPlayerInput(allPlayersChoice);
             if (!isCorrectUserInput.Item1)
             {
@@ -75,6 +77,10 @@ namespace ListPoker.View
 
                 ShowResults(results);
                 this.Invalidate();
+            }
+            if (printNewStep)
+            {
+                CreateRoundArea();
             }
         }
         private void Form1_Paint(object sender, PaintEventArgs e)
@@ -185,7 +191,8 @@ namespace ListPoker.View
             {
                 for (var j = 0; j < 4; j++)
                 {
-                    PictureBox pic = DrawLine(1, TableInfo.secondRowHeight + ((maxCards - 1) * 2 + players.Count * 2) * TableInfo.roundRowHeight, new Point(TableInfo.firstColumnWidth + TableInfo.secondColumnWidth + i * TableInfo.playerColumnWidth + j * TableInfo.playerInfoColumnWidth, TableInfo.firstRowHeight));
+                    PictureBox pic = DrawLine(1, TableInfo.secondRowHeight + ((maxCards - 1) * 2 + players.Count * 2) * TableInfo.roundRowHeight, 
+                        new Point(TableInfo.firstColumnWidth + TableInfo.secondColumnWidth + i * TableInfo.playerColumnWidth + j * TableInfo.playerInfoColumnWidth, TableInfo.firstRowHeight));
                     this.Controls.Add(pic);
                 }
             }
@@ -256,7 +263,10 @@ namespace ListPoker.View
             }
         }
 
-        private void DrawPlayerInfo()
+        /// <summary>
+        /// Draws player's choice variants like "заказ", "темная" and others
+        /// </summary>
+        private void DrawPlayerRoundVariants()
         {
             GameLabel gameLabel = new GameLabel();
             for (var i = 0; i < players.Count; i++)
@@ -274,30 +284,40 @@ namespace ListPoker.View
         private void CreateRoundArea()
         {
             var maxCards = 36 / players.Count;
-            var iterationCount = (maxCards - 1) * 2 + players.Count * 2;
-            for (var k = 1; k <= iterationCount; k++)
+            //var iterationCount = (maxCards - 1) * 2 + players.Count * 2;
+            Dictionary<Player, List<ComboBox>> currentPlayerInfo = new Dictionary<Player, List<ComboBox>>();
+            for (var i = 0; i < players.Count; i++)
             {
-                Dictionary<Player, TextBox[]> currentPlayerInfo = new Dictionary<Player, TextBox[]>();
-                for (var i = 0; i < players.Count; i++)
+                List<ComboBox> playersChoices = new List<ComboBox>();
+                for (var j = 0; j < 3; j++)
                 {
-                    TextBox[] playerInfo = new TextBox[3];
-                    for (var j = 0; j < 3; j++)
-                    {
-                        TextBox playerChoice = new TextBox();
-                        playerChoice.Location = new Point(TableInfo.firstColumnWidth + TableInfo.secondColumnWidth + j * TableInfo.playerInfoColumnWidth + 10 + TableInfo.playerColumnWidth * i,
-                                                            TableInfo.firstRowHeight + TableInfo.secondRowHeight + (k - 1) * TableInfo.roundRowHeight + 6);
-                        playerChoice.Size = new Size(60, 30);
-                        if (iterationCount - k < players.Count && j == 0)
-                        {
-                            playerChoice.ReadOnly = true;
-                        }
-                        playerInfo[j] = playerChoice;
-                        this.Controls.Add(playerChoice);
-                    }
-                    currentPlayerInfo.Add(players[i], playerInfo);
+                    // TODO: create variable with current card count
+                    ComboBox playerChoice = createAreaForCurrentStep(maxCards);
+                    playerChoice.Location = new Point(TableInfo.firstColumnWidth + TableInfo.secondColumnWidth + j * TableInfo.playerInfoColumnWidth + 10 + TableInfo.playerColumnWidth * i,
+                                                        TableInfo.firstRowHeight + TableInfo.secondRowHeight + (currentStep - 1) * TableInfo.roundRowHeight + 6);
+                    playerChoice.Size = new Size(60, 30);
+                    
+                    this.Controls.Add(playerChoice);
+                    playersChoices.Add(playerChoice);
                 }
-                allPlayersChoice.Add(k, currentPlayerInfo);
+                currentPlayerInfo.Add(players[i], playersChoices);
             }
+            allPlayersChoice.Add(currentStep - 1, currentPlayerInfo);
+            printNewStep = false;
+        }
+
+        private ComboBox createAreaForCurrentStep(int cardsCount)
+        {
+            ComboBox playerChoice = new ComboBox();
+            for (var j = 0; j < 3; j++)
+            {
+                for (var i = 0; i <= cardsCount; i++)
+                {
+                    playerChoice.Items.Add(i);
+                }
+            }
+
+            return playerChoice;
         }
 
         /// <summary>
@@ -345,5 +365,25 @@ namespace ListPoker.View
                 }
             }
         }
+
+        //private void DrawFailureButton()
+        //{
+        //    foreach (var item in playersResults)
+        //    {
+        //        for (var i = 0; i < players.Count; i++)
+        //        {
+        //            Button failureButton = new Button();
+        //            failureButton.Location = new Point(TableInfo.firstColumnWidth + TableInfo.secondColumnWidth + i * TableInfo.playerColumnWidth + TableInfo.secondRowHeight + 10, 0);
+        //            failureButton.Size = new Size(10, 5);
+        //            failureButton.Text = "Минус 10";
+        //            failureButton.Click += new EventHandler(SubstractTen);
+        //        }
+        //    }
+        //}
+
+        //private void SubstractTen(object sender, EventArgs e)
+        //{
+        //    playersResults[item.Key][i].Text = (int.Parse(playersResults[item.Key][i].Text) - 10).ToString();
+        //}
     }
 }
