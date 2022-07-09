@@ -9,6 +9,7 @@ namespace ListPoker
     {
         public string name { get; private set; }
         public int score { get; private set; }
+        public bool isDistributor { get; set; }
 
 
        public Player(string name)

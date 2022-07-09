@@ -8,7 +8,7 @@ namespace ListPoker.Model
 {
     class TableChecker
     {
-        public (bool, int) CheckPlayerInfo(Dictionary<int, Dictionary<Player, TextBox[]>> allPlayersChoice)
+        public (bool, int) CheckPlayerInfo(Dictionary<int, Dictionary<Player, List<ComboBox>>> allPlayersChoice)
         {
             var isCorrect = true;
             var correctStep = 0;
@@ -66,6 +66,5 @@ namespace ListPoker.Model
             
         }
 
-        public bool CheckNextRoundArea()
     }
 }

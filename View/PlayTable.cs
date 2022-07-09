@@ -23,7 +23,9 @@ namespace ListPoker.View
         Brush br;
         
         int currentStep = 1;
-        bool printNewStep = true;
+
+        private int maxCards;
+        private List<int> cardsCount = new List<int>();
 
         Form1 form1;
         public PlayTable(string playerNames, Form1 form)
@@ -33,6 +35,9 @@ namespace ListPoker.View
             {
                 players.Add(new Player(nameList[i]));
             }
+            players[0].isDistributor = true;
+
+            maxCards = 36 / players.Count;
             this.form1 = form;
             InitializeComponent();
             
@@ -41,7 +46,7 @@ namespace ListPoker.View
             DrawDistributor();
             DrawCardCount();
             DrawPlayerRoundVariants();
-            
+            CreateRoundArea();
             CreateResultLabels();
             timer1.Interval = 500;
             timer1.Start();
@@ -75,13 +80,10 @@ namespace ListPoker.View
                 this.Paint += Form1_Paint;
                 Dictionary<int, List<int>> results = tableController.CalculatePlayersScore(allPlayersChoice, playersResults);
 
-                ShowResults(results);
+                //ShowResults(results);
                 this.Invalidate();
             }
-            if (printNewStep)
-            {
-                CreateRoundArea();
-            }
+                
         }
         private void Form1_Paint(object sender, PaintEventArgs e)
         {
@@ -234,6 +236,7 @@ namespace ListPoker.View
         {
             var maxCards = 36 / players.Count;
             var counter = 1;
+            cardsCount.Add(counter);
             
             GameLabel gameLabel = new GameLabel();
 
@@ -241,25 +244,30 @@ namespace ListPoker.View
             {
                 this.Controls.Add(gameLabel.CardCount(counter, i));
                 counter++;
+                cardsCount.Add(counter);
             }
             var tempCounter = counter - 1;
             for (var i = 0; i < players.Count; i++)
             {
                 this.Controls.Add(gameLabel.CardCount(counter, tempCounter));
                 tempCounter++;
+                cardsCount.Add(counter);
             }
             counter--;
+            cardsCount.Add(counter);
             for (var i = maxCards - 1; i > 0; i--)
             {
                 this.Controls.Add(gameLabel.CardCount(counter, tempCounter));
                 tempCounter++;
                 counter--;
+                cardsCount.Add(counter);
             }
 
             for (var i = 0; i < players.Count; i++)
             {
                 this.Controls.Add(gameLabel.CardCount(maxCards, tempCounter));
                 tempCounter++;
+                cardsCount.Add(maxCards);
             }
         }
 
@@ -283,40 +291,41 @@ namespace ListPoker.View
         /// </summary>
         private void CreateRoundArea()
         {
-            var maxCards = 36 / players.Count;
-            //var iterationCount = (maxCards - 1) * 2 + players.Count * 2;
-            Dictionary<Player, List<ComboBox>> currentPlayerInfo = new Dictionary<Player, List<ComboBox>>();
-            for (var i = 0; i < players.Count; i++)
+            
+            var iterationCount = (maxCards - 1) * 2 + players.Count * 2;
+
+            for (var m = 0; m < iterationCount; m++)
             {
-                List<ComboBox> playersChoices = new List<ComboBox>();
-                for (var j = 0; j < 3; j++)
+                Dictionary<Player, List<ComboBox>> currentPlayerInfo = new Dictionary<Player, List<ComboBox>>();
+                for (var i = 0; i < players.Count; i++)
                 {
-                    // TODO: create variable with current card count
-                    ComboBox playerChoice = createAreaForCurrentStep(maxCards);
-                    playerChoice.Location = new Point(TableInfo.firstColumnWidth + TableInfo.secondColumnWidth + j * TableInfo.playerInfoColumnWidth + 10 + TableInfo.playerColumnWidth * i,
-                                                        TableInfo.firstRowHeight + TableInfo.secondRowHeight + (currentStep - 1) * TableInfo.roundRowHeight + 6);
-                    playerChoice.Size = new Size(60, 30);
-                    
-                    this.Controls.Add(playerChoice);
-                    playersChoices.Add(playerChoice);
+                    // list with player's current oders and gets without result
+                    List<ComboBox> playersChoices = new List<ComboBox>();
+                    for (var j = 0; j < 3; j++)
+                    {
+                        ComboBox playerChoice = createAreaForCurrentStep(cardsCount[m]);
+                        playerChoice.Location = new Point(TableInfo.firstColumnWidth + TableInfo.secondColumnWidth + j * TableInfo.playerInfoColumnWidth + 10 + TableInfo.playerColumnWidth * i,
+                                                            TableInfo.firstRowHeight + TableInfo.secondRowHeight + (currentStep - 1) * TableInfo.roundRowHeight + 6);
+                        playerChoice.Size = new Size(60, 30);    
+
+                        this.Controls.Add(playerChoice);
+                        playersChoices.Add(playerChoice);
+                    }
+                    currentPlayerInfo.Add(players[i], playersChoices);
                 }
-                currentPlayerInfo.Add(players[i], playersChoices);
+                allPlayersChoice.Add(m, currentPlayerInfo);
             }
-            allPlayersChoice.Add(currentStep - 1, currentPlayerInfo);
-            printNewStep = false;
+            
         }
 
         private ComboBox createAreaForCurrentStep(int cardsCount)
         {
             ComboBox playerChoice = new ComboBox();
-            for (var j = 0; j < 3; j++)
+            for (var i = 0; i <= cardsCount; i++)
             {
-                for (var i = 0; i <= cardsCount; i++)
-                {
-                    playerChoice.Items.Add(i);
-                }
+                playerChoice.Items.Add(i);
             }
-
+            
             return playerChoice;
         }
 

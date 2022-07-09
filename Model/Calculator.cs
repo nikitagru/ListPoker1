@@ -9,7 +9,7 @@ namespace ListPoker.Model
     {
         
         Dictionary<int, List<int>> newResults = new Dictionary<int, List<int>>();
-        public Dictionary<int, List<int>> CalculateScore(Dictionary<int, Dictionary<Player, TextBox[]>> allPlayersChoice)
+        public Dictionary<int, List<int>> CalculateScore(Dictionary<int, Dictionary<Player, List<ComboBox>>> allPlayersChoice)
         {
             foreach (var item in allPlayersChoice)
             {
