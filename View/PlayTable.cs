@@ -68,21 +68,21 @@ namespace ListPoker.View
         {
             this.Invalidate();
             
-            (bool, int) isCorrectUserInput = tableController.CheckPlayerInput(allPlayersChoice);
-            if (!isCorrectUserInput.Item1)
-            {
-                br = new SolidBrush(Color.FromArgb(184, 81, 81));
-                currentStep = isCorrectUserInput.Item2;
-                this.Paint += Form1_Paint;
-            } else
-            {
-                currentStep = -10;
-                this.Paint += Form1_Paint;
-                Dictionary<int, List<int>> results = tableController.CalculatePlayersScore(allPlayersChoice, playersResults);
+            //(bool, int) isCorrectUserInput = tableController.CheckPlayerInput(allPlayersChoice);
+            //if (!isCorrectUserInput.Item1)
+            //{
+            //    br = new SolidBrush(Color.FromArgb(184, 81, 81));
+            //    currentStep = isCorrectUserInput.Item2;
+            //    this.Paint += Form1_Paint;
+            //} else
+            //{
+            //    currentStep = -10;
+            //    this.Paint += Form1_Paint;
+            //    Dictionary<int, List<int>> results = tableController.CalculatePlayersScore(allPlayersChoice, playersResults);
 
-                //ShowResults(results);
-                this.Invalidate();
-            }
+            //    //ShowResults(results);
+            //    this.Invalidate();
+            //}
                 
         }
         private void Form1_Paint(object sender, PaintEventArgs e)
@@ -291,7 +291,6 @@ namespace ListPoker.View
         /// </summary>
         private void CreateRoundArea()
         {
-            
             var iterationCount = (maxCards - 1) * 2 + players.Count * 2;
 
             for (var m = 0; m < iterationCount; m++)
@@ -305,7 +304,7 @@ namespace ListPoker.View
                     {
                         ComboBox playerChoice = createAreaForCurrentStep(cardsCount[m]);
                         playerChoice.Location = new Point(TableInfo.firstColumnWidth + TableInfo.secondColumnWidth + j * TableInfo.playerInfoColumnWidth + 10 + TableInfo.playerColumnWidth * i,
-                                                            TableInfo.firstRowHeight + TableInfo.secondRowHeight + (currentStep - 1) * TableInfo.roundRowHeight + 6);
+                                                            TableInfo.firstRowHeight + TableInfo.secondRowHeight + m * TableInfo.roundRowHeight + 6);
                         playerChoice.Size = new Size(60, 30);    
 
                         this.Controls.Add(playerChoice);
